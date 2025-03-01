@@ -16,4 +16,4 @@ streamlit
 matplotlib  
 
 # Git-based dependencies (moved last to avoid conflicts)  
-git+https://github.com/simonsanvil/subplotted.git  
+# git+https://github.com/simonsanvil/subplotted.git  
