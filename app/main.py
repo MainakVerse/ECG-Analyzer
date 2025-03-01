@@ -20,8 +20,6 @@ st.set_page_config(
 st.write("""
 # 🫀 ECG Classification
 
-For this app, we trained a model to detect heart anomalies based on the [Physionet 2017 Cardiology Challenge](https://physionet.org/content/challenge-2017/1.0.0/) 
-dataset.
 
 **Possible Predictions:** Atrial Fibrillation, Normal, Other Rhythm, or Noise
 
