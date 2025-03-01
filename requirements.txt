@@ -2,10 +2,10 @@
 -e .
 
 # external requirements
+google-generativeai
 pdoc3
 click
 Sphinx
-google-generativeai
 coverage
 awscli
 flake8
