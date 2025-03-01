@@ -3,6 +3,7 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import scipy.io
 from src.visualization import plot_ecg
+import google.generativeai as genai  # For the Gemini integration
 
 #---------------------------------#
 # Page layout
@@ -65,6 +66,128 @@ st.markdown("""
     .stSidebar {
         background-color: #F1FAEE;
     }
+    .section-header {
+        color: #1D3557;
+        border-bottom: 2px solid #E63946;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+    .info-card {
+        background-color: #F1FAEE;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Tablet-like response area and chat styling */
+    .tablet-response {
+        background-color: #f7f9fc;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e0e5ec;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+        font-family: 'Courier New', monospace;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    /* Custom scrollbar for the tablet */
+    .tablet-response::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .tablet-response::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .tablet-response::-webkit-scrollbar-thumb {
+        background: #E63946;
+        border-radius: 10px;
+        color: #000000;
+    }
+    
+    .typewriter-text {
+        overflow: hidden;
+        border-right: .15em solid #E63946;
+        white-space: pre-wrap;
+        margin: 0 auto;
+        letter-spacing: .1em;
+        color: #000000;
+        animation: 
+            typing 3.5s steps(40, end),
+            blink-caret .75s step-end infinite;
+    }
+    
+    @keyframes typing {
+        from { max-width: 0 }
+        to { max-width: 100% }
+    }
+    
+    @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: #E63946; }
+    }
+    
+    .chat-message-user {
+        background-color: #F1FAEE;
+        padding: 10px 15px;
+        border-radius: 18px 18px 18px 0;
+        margin-bottom: 10px;
+        display: inline-block;
+        max-width: 80%;
+        color: #000000;
+    }
+    
+    .chat-message-bot {
+        background-color: #e6f2ff;
+        padding: 10px 15px;
+        color: #000000;
+        border-radius: 18px 18px 0 18px;
+        margin-bottom: 10px;
+        margin-left: auto;
+        display: inline-block;
+        max-width: 80%;
+    }
+    
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .user-container {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .bot-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 15px;
+    }
+    
+    /* Question button styling */
+    .question-button {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e5ec;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+        width: 100%;
+        text-align: left;
+    }
+    
+    .question-button:hover {
+        background-color: #F1FAEE;
+        border-left: 3px solid #E63946;
+    }
+    
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -243,88 +366,185 @@ with tabs[0]:
 #---------------------------------#
 # Tab 2: Ask the Cardio
 with tabs[1]:
-    st.markdown("<h1 class='main-header'>💬 Ask the Cardio</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='sub-header'>Your AI assistant for ECG and heart health questions</p>", unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">💬 Ask the Cardio</h1>', unsafe_allow_html=True)
     
-    st.markdown("---")
+    st.markdown("""
+    <div class="info-card">
+        <h3 style="color:#1D3557;">Your AI Cardiology Assistant</h3>
+        <p>Get expert advice on ECG interpretation, heart rhythm disorders, and cardiovascular health. Our AI-powered Cardio Assistant can answer your questions about heart conditions and ECG patterns.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "assistant", "content": "Hello! I'm your cardiology assistant. I can answer questions about ECGs, heart rhythms, and cardiovascular health. How can I help you today?"}
-        ]
+    # Display a relevant image and the chat interface
+    col1, col2 = st.columns([1, 2])
     
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    with col1:
+        st.image("https://api.iconify.design/openmoji/anatomical-heart.svg?width=300", use_column_width=True)
     
-    # Function to generate responses about ECG and heart health
-    def generate_cardio_response(prompt):
-        # Dictionary of common ECG and cardiology questions and answers
-        cardio_knowledge = {
-            "atrial fibrillation": "Atrial fibrillation (AFib) is an irregular and often rapid heart rhythm that can increase risk of stroke, heart failure, and other heart-related complications. On an ECG, it's characterized by irregular R-R intervals and absence of P waves.",
-            "normal ecg": "A normal ECG typically shows regular rhythm with P waves, QRS complexes, and T waves in sequence. The P-R interval is usually 0.12-0.20 seconds, QRS duration 0.06-0.10 seconds, and Q-T interval 0.36-0.44 seconds.",
-            "heart rate": "Normal resting heart rate for adults ranges from 60-100 beats per minute (BPM). Athletes may have lower resting heart rates, sometimes as low as 40 BPM, which is usually not a concern.",
-            "ecg leads": "A standard 12-lead ECG uses electrodes placed on the limbs and chest to record electrical activity from different angles. These include leads I, II, III, aVR, aVL, aVF (limb leads) and V1-V6 (chest leads).",
-            "qt interval": "The QT interval represents ventricular depolarization and repolarization. A prolonged QT interval can indicate a risk for potentially dangerous arrhythmias like torsades de pointes.",
-            "st elevation": "ST elevation on an ECG often indicates myocardial injury or infarction (heart attack). It represents damage to heart muscle and requires immediate medical attention.",
-            "ecg interpretation": "ECG interpretation involves analyzing the regularity of rhythm, heart rate, P waves, PR interval, QRS complex, T waves, QT interval, and looking for any abnormal patterns or changes.",
-            "heart block": "Heart blocks occur when electrical signals between the atria and ventricles are delayed or blocked. They can be first-degree (PR prolongation), second-degree (intermittent blocking), or third-degree (complete block).",
-            "premature beats": "Premature beats can be atrial (PACs) or ventricular (PVCs). They appear as early beats on the ECG and are usually benign but can sometimes indicate underlying heart disease.",
-            "ventricular tachycardia": "Ventricular tachycardia is a rapid heart rhythm starting in the ventricles. On ECG, it appears as wide QRS complexes at a rate typically >100 BPM. It can be life-threatening and requires immediate treatment."
-        }
+    with col2:
+        # Add Gemini AI integration
+        # Initialize chat history
+        if "cardio_chat_history" not in st.session_state:
+            st.session_state.cardio_chat_history = [
+                ("Cardio Assistant", "Hello! I'm your cardiology assistant. I can answer questions about ECGs, heart rhythms, and cardiovascular health. How can I help you today?")
+            ]
+            
+        # Initialize a session state for the selected question
+        if "selected_cardio_question" not in st.session_state:
+            st.session_state.selected_cardio_question = ""
+            
+        # Load API Key from Streamlit secrets
+        try:
+            GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+            if not GEMINI_API_KEY:
+                st.error("API key is missing! Add it to Streamlit secrets.")
+                has_api_key = False
+            else:
+                has_api_key = True
+        except:
+            st.warning("To enable the Cardio Assistant chatbot with Gemini AI, please add your Gemini API key to Streamlit secrets. Using the built-in cardio knowledge base for now.")
+            GEMINI_API_KEY = None
+            has_api_key = False
         
-        # Check if any keywords match in the prompt
-        response = "I don't have specific information about that in my cardiology knowledge base. Please ask something related to ECGs or heart conditions."
+        # Function to generate responses about ECG and heart health
+        def generate_cardio_response(prompt):
+            if has_api_key:
+                # Configure Gemini API
+                genai.configure(api_key=GEMINI_API_KEY)
+                
+                gemini_prompt = f"""
+                You are a cardiology assistant specialized in ECG interpretation, heart rhythm disorders, and cardiovascular health.
+                Answer only cardiology and ECG-related queries with medically accurate information.
+                If a question is unrelated to cardiology, politely inform the user that you can only answer 
+                heart and ECG-related questions.
+                
+                Especially focus on these conditions and ECG patterns:
+                - Normal sinus rhythm
+                - Atrial Fibrillation
+                - Atrial Flutter
+                - Ventricular tachycardia
+                - QT prolongation
+                - ST elevation and depression
+                - Heart blocks (first, second, third degree)
+                - Bundle branch blocks
+                - Premature ventricular contractions
+                - Premature atrial contractions
+                - ECG lead placement and interpretation
+                
+                **User's Question:** {prompt}
+                Provide a clear, concise, and accurate response about cardiology and ECG interpretation.
+                """
+                model = genai.GenerativeModel("gemini-1.5-pro-latest")
+                response = model.generate_content(gemini_prompt)
+                
+                return response.text
+            else:
+                # Dictionary of common ECG and cardiology questions and answers
+                cardio_knowledge = {
+                    "atrial fibrillation": "Atrial fibrillation (AFib) is an irregular and often rapid heart rhythm that can increase risk of stroke, heart failure, and other heart-related complications. On an ECG, it's characterized by irregular R-R intervals and absence of P waves.",
+                    "normal ecg": "A normal ECG typically shows regular rhythm with P waves, QRS complexes, and T waves in sequence. The P-R interval is usually 0.12-0.20 seconds, QRS duration 0.06-0.10 seconds, and Q-T interval 0.36-0.44 seconds.",
+                    "heart rate": "Normal resting heart rate for adults ranges from 60-100 beats per minute (BPM). Athletes may have lower resting heart rates, sometimes as low as 40 BPM, which is usually not a concern.",
+                    "ecg leads": "A standard 12-lead ECG uses electrodes placed on the limbs and chest to record electrical activity from different angles. These include leads I, II, III, aVR, aVL, aVF (limb leads) and V1-V6 (chest leads).",
+                    "qt interval": "The QT interval represents ventricular depolarization and repolarization. A prolonged QT interval can indicate a risk for potentially dangerous arrhythmias like torsades de pointes.",
+                    "st elevation": "ST elevation on an ECG often indicates myocardial injury or infarction (heart attack). It represents damage to heart muscle and requires immediate medical attention.",
+                    "ecg interpretation": "ECG interpretation involves analyzing the regularity of rhythm, heart rate, P waves, PR interval, QRS complex, T waves, QT interval, and looking for any abnormal patterns or changes.",
+                    "heart block": "Heart blocks occur when electrical signals between the atria and ventricles are delayed or blocked. They can be first-degree (PR prolongation), second-degree (intermittent blocking), or third-degree (complete block).",
+                    "premature beats": "Premature beats can be atrial (PACs) or ventricular (PVCs). They appear as early beats on the ECG and are usually benign but can sometimes indicate underlying heart disease.",
+                    "ventricular tachycardia": "Ventricular tachycardia is a rapid heart rhythm starting in the ventricles. On ECG, it appears as wide QRS complexes at a rate typically >100 BPM. It can be life-threatening and requires immediate treatment.",
+                    "heart": "The heart is a muscular organ responsible for pumping blood throughout your body. An ECG records the electrical activity of your heart and helps detect various heart conditions like arrhythmias, heart attacks, and structural abnormalities.",
+                    "ecg": "An electrocardiogram (ECG or EKG) is a test that records the electrical activity of your heart. It shows how fast your heart beats and whether its rhythm is steady or irregular. ECGs are used to detect heart problems like arrhythmias, heart attacks, and structural abnormalities.",
+                    "arrhythmia": "Cardiac arrhythmias are abnormal heart rhythms that cause the heart to beat too fast, too slow, or irregularly. Common types include atrial fibrillation, atrial flutter, ventricular tachycardia, and bradycardia. ECGs are the primary tool for diagnosing arrhythmias.",
+                    "bradycardia": "Bradycardia is a slower than normal heart rate, typically below 60 beats per minute. It may be normal in athletic individuals but can cause symptoms like fatigue, dizziness, and fainting in others. On an ECG, it appears as normally formed complexes that occur at a slow rate.",
+                    "tachycardia": "Tachycardia is a faster than normal heart rate, typically above 100 beats per minute. It can be sinus tachycardia (normal response to exercise or stress) or pathological. On an ECG, it appears as normally formed complexes occurring at a rapid rate.",
+                    "p wave": "The P wave on an ECG represents atrial depolarization (contraction of the atria). Normal P waves are rounded, upright in lead II, and less than 0.12 seconds in duration. Abnormal P waves can indicate atrial enlargement or ectopic atrial rhythms.",
+                    "qrs complex": "The QRS complex represents ventricular depolarization (contraction of the ventricles). Normal QRS duration is 0.06-0.10 seconds. Wide QRS complexes can indicate bundle branch blocks, ventricular rhythms, or other conduction abnormalities.",
+                    "t wave": "The T wave represents ventricular repolarization (recovery of the ventricles). Normal T waves are slightly asymmetric with a gradual upslope and faster downslope. Abnormal T waves can indicate ischemia, electrolyte disturbances, or other cardiac conditions.",
+                    "bundle branch block": "Bundle branch blocks occur when there's a delay or obstruction in the electrical conduction pathway of the heart. On an ECG, they appear as wide QRS complexes (>0.12 seconds) with characteristic patterns depending on whether the right or left bundle is affected.",
+                    "heart attack": "A heart attack (myocardial infarction) occurs when blood flow to part of the heart muscle is blocked. On an ECG, it can show ST segment elevation, Q waves, or T wave inversions depending on the timing and location of the infarction."
+                }
+                
+                response = "I don't have specific information about that in my cardiology knowledge base. Please ask something related to ECGs or heart conditions."
+                
+                # Simple keyword matching
+                prompt_lower = prompt.lower()
+                for keyword, info in cardio_knowledge.items():
+                    if keyword.lower() in prompt_lower:
+                        response = info
+                        break
+                
+                # General queries about ECG
+                if "what is" in prompt_lower and "ecg" in prompt_lower:
+                    response = cardio_knowledge["ecg"]
+                
+                # Queries about rhythm disorders
+                if "rhythm disorder" in prompt_lower or "arrhythmia" in prompt_lower:
+                    response = cardio_knowledge["arrhythmia"]
+                
+                return response
+            
+        # User input - note that we're using the session state value as the default
+        user_query = st.text_input("Ask your question about ECG interpretation or heart health:", 
+                                  value=st.session_state.selected_cardio_question,
+                                  key="cardio_assistant_query")
         
-        # Simple keyword matching - could be enhanced with more sophisticated NLP
-        for keyword, info in cardio_knowledge.items():
-            if keyword.lower() in prompt.lower():
-                response = info
-                break
+        # After the user submits a question, clear the selected_question
+        if st.button("Ask Cardio Assistant"):
+            if user_query:
+                with st.spinner("Cardio Assistant is thinking..."):
+                    try:
+                        # Get the response
+                        response = generate_cardio_response(user_query)
+                        # Add to chat history
+                        st.session_state.cardio_chat_history.append(("You", user_query))
+                        st.session_state.cardio_chat_history.append(("Cardio Assistant", response))
+                        # Clear the selected question after submission
+                        st.session_state.selected_cardio_question = ""
+                    except Exception as e:
+                        st.error(f"Error generating response: {str(e)}")
+                        
+    # Display chat history in tablet-like response area
+    if "cardio_chat_history" in st.session_state and len(st.session_state.cardio_chat_history) > 0:
+        st.subheader("Conversation with Cardio Assistant")
         
-        # General queries about ECG
-        if "what is" in prompt.lower() and "ecg" in prompt.lower():
-            response = "An electrocardiogram (ECG or EKG) is a test that records the electrical activity of your heart. It shows how fast your heart beats and whether its rhythm is steady or irregular. ECGs are used to detect heart problems like arrhythmias, heart attacks, and structural abnormalities."
-        
-        # Queries about rhythm disorders
-        if "rhythm disorder" in prompt.lower() or "arrhythmia" in prompt.lower():
-            response = "Common cardiac rhythm disorders visible on ECG include:\n\n- Atrial fibrillation - irregular rhythm without P waves\n- Atrial flutter - rapid regular atrial activity with 'sawtooth' pattern\n- Ventricular tachycardia - rapid wide-complex rhythm\n- Bradycardia - abnormally slow heart rate (<60 BPM)\n- Heart blocks - disrupted conduction between chambers"
-        
-        return response
+        # Create a tablet-like container for the conversation
+        with st.container():
+            st.markdown('<div class="tablet-response">', unsafe_allow_html=True)
+            
+            for i, (role, message) in enumerate(st.session_state.cardio_chat_history):
+                if role == "You":
+                    st.markdown(f'<div class="user-container"><div class="chat-message-user"><strong>👨‍⚕️ {role}:</strong> {message}</div></div>', unsafe_allow_html=True)
+                else:
+                    # For the latest bot response, add the typewriter effect
+                    if i == len(st.session_state.cardio_chat_history) - 1 and role == "Cardio Assistant":
+                        st.markdown(f'<div class="bot-container"><div class="chat-message-bot"><strong>🫀 {role}:</strong> <span class="typewriter-text">{message}</span></div></div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown(f'<div class="bot-container"><div class="chat-message-bot"><strong>🫀 {role}:</strong> {message}</div></div>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
     
-    # Chat input
-    if prompt := st.chat_input("Ask a question about ECGs or heart health"):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        
-        # Generate and display assistant response
-        with st.chat_message("assistant"):
-            response = generate_cardio_response(prompt)
-            st.markdown(response)
-        
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        
-    # Display some example questions
-    with st.expander("Example questions you can ask"):
-        st.markdown("""
-        - What does a normal ECG look like?
-        - What is atrial fibrillation and how does it appear on an ECG?
-        - What causes an elevated ST segment?
-        - What is the QT interval and why is it important?
-        - How can I interpret different ECG leads?
-        - What are the signs of ventricular tachycardia on an ECG?
-        - How does a heart block appear on an ECG?
-        - What's the difference between PVCs and PACs?
-        - How are arrhythmias classified?
-        - What heart conditions can be diagnosed with an ECG?
-        """)
+    # Add some common questions as examples
+    st.markdown('<h3 class="section-header">Common Questions</h3>', unsafe_allow_html=True)
+    
+    example_questions = [
+        "What does a normal ECG look like?",
+        "How can I identify atrial fibrillation on an ECG?",
+        "What causes ST elevation on an ECG?",
+        "What is the QT interval and why is it important?",
+        "How do heart blocks appear on an ECG?"
+    ]
+    
+    # Create functions for handling button clicks
+    def set_cardio_question(question):
+        st.session_state.selected_cardio_question = question
+    
+    col1, col2 = st.columns(2)
+    for i, question in enumerate(example_questions):
+        if i % 2 == 0:
+            with col1:
+                st.button(f"❓ {question}", key=f"cardio_q{i}", on_click=set_cardio_question, args=(question,))
+        else:
+            with col2:
+                st.button(f"❓ {question}", key=f"cardio_q{i}", on_click=set_cardio_question, args=(question,))
     
     # Disclaimer
     st.markdown("---")
