@@ -245,7 +245,7 @@ def visualize_ecg(ecg, FS):
 # Sidebar - Collects user input features into dataframe
 with st.sidebar:
     st.image("https://api.iconify.design/openmoji/anatomical-heart.svg?width=100", width=100)
-    st.markdown("<h2 style='text-align: center; color: #000000;'>ECG Analysis Tool</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #ffffff;'>ECG Analysis Tool</h2>", unsafe_allow_html=True)
     st.markdown("<hr>", unsafe_allow_html=True)
     
     st.markdown("### 1. Upload your ECG")
