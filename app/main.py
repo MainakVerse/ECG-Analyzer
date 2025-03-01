@@ -370,7 +370,7 @@ with tabs[1]:
     st.markdown("""
     <div class="info-card">
         <h3 style="color:#1D3557;">Your AI Cardiology Assistant</h3>
-        <p>Get expert advice on ECG interpretation, heart rhythm disorders, and cardiovascular health. Our AI-powered Cardio Assistant can answer your questions about heart conditions and ECG patterns.</p>
+        <p style="color:#000000;">Get expert advice on ECG interpretation, heart rhythm disorders, and cardiovascular health. Our AI-powered Cardio Assistant can answer your questions about heart conditions and ECG patterns.</p>
     </div>
     """, unsafe_allow_html=True)
     
