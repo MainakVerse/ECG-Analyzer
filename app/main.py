@@ -64,7 +64,7 @@ st.markdown("""
         margin-top: 2rem;
     }
     .stSidebar {
-        background-color: #F1FAEE;
+        background-color: #000000;
     }
     .section-header {
         color: #1D3557;
