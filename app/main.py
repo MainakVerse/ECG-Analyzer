@@ -28,7 +28,7 @@ st.markdown("""
         font-size: 1.2rem;
         color: #457B9D;
         text-align: center;
-        margin-bottom: 1.5rem;
+       
     }
     .stTabs [data-baseweb="tab-list"] {
         gap: 2rem;
@@ -39,8 +39,7 @@ st.markdown("""
         background-color: #F1FAEE;
         border-radius: 4px 4px 0 0;
         gap: 1rem;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+      
     }
     .stTabs [aria-selected="true"] {
         background-color: #A8DADC;
@@ -50,7 +49,6 @@ st.markdown("""
     .prediction-box {
         background-color: #F1FAEE;
         border-radius: 10px;
-        padding: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     .result-highlight {
@@ -69,14 +67,12 @@ st.markdown("""
     .section-header {
         color: #1D3557;
         border-bottom: 2px solid #E63946;
-        padding-bottom: 8px;
-        margin-bottom: 16px;
+        
     }
     .info-card {
         background-color: #F1FAEE;
         border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
+          
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
     
@@ -84,10 +80,10 @@ st.markdown("""
     .tablet-response {
         background-color: #f7f9fc;
         border-radius: 12px;
-        padding: 20px;
+        
         border: 1px solid #e0e5ec;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-        margin-bottom: 20px;
+       
         font-family: 'Courier New', monospace;
         max-height: 300px;
         overflow-y: auto;
