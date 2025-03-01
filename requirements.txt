@@ -1,17 +1,19 @@
-# local package
--e .
+# Local package  
+-e .  
 
-# external requirements
-google-generativeai
-pdoc3
-click
-Sphinx
-coverage
-awscli
-flake8
-python-dotenv>=0.5.1
-tensorflow>=2.5.1
-keras
-streamlit
-matplotlib
-git+https://github.com/simonsanvil/subplotted.git
+# External dependencies  
+google-generativeai  
+pdoc3  
+click  
+Sphinx  
+coverage  
+awscli  
+flake8  
+python-dotenv>=0.5.1  
+tensorflow>=2.5.1  
+keras>=2.5.0  # Ensuring compatibility with TensorFlow  
+streamlit  
+matplotlib  
+
+# Git-based dependencies (moved last to avoid conflicts)  
+git+https://github.com/simonsanvil/subplotted.git  
