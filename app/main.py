@@ -25,13 +25,6 @@ dataset.
 
 **Possible Predictions:** Atrial Fibrillation, Normal, Other Rhythm, or Noise
 
-### Authors:
-
-- Simon E. Sanchez Viloria
-- Andres Ruiz Calvo
-- Daniel De Las Cuevas Turel
-- Enrique Botía Barbera
-- Zijun He
 
 
 **Try uploading your own ECG!**
@@ -154,12 +147,12 @@ if uploaded_file is None:
             f = open("data/validation/"+pre_trained_ecg, 'rb')
             if not uploaded_file:
                 uploaded_file = f
-        st.sidebar.markdown("Source: Physionet 2017 Cardiology Challenge")
+        
 else:
     st.sidebar.markdown("Remove the file above to demo using the validation set.")
 
 st.sidebar.markdown("---------------")
-st.sidebar.markdown("Check the [Github Repository](https://github.com/simonsanvil/ECG-classification-MLH) of this project")
+st.sidebar.markdown("Made by [Mainak](https://github.com/MainakVerse)")
 #---------------------------------#
 # Main panel
 
