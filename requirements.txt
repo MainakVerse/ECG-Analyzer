@@ -5,6 +5,7 @@
 pdoc3
 click
 Sphinx
+google-generativeai
 coverage
 awscli
 flake8
