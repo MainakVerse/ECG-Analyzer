@@ -321,7 +321,7 @@ with tabs[0]:
             with st.spinner(text="Running Model..."):
                 pred, conf = get_prediction(ecg, model)
             
-            st.markdown("<div class='prediction-box'>", unsafe_allow_html=True)
+            # st.markdown("<div class='prediction-box'>", unsafe_allow_html=True)
             st.markdown(f"<h3>ECG classified as <span class='result-highlight'>{pred}</span></h3>", unsafe_allow_html=True)
             
             pred_confidence = conf[0, np.argmax(conf)]*100
