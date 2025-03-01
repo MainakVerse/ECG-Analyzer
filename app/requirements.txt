@@ -3,5 +3,6 @@ keras
 streamlit
 scipy
 matplotlib
+google-generativeai
 git+https://github.com/simonsanvil/subplotted.git
 -e .
