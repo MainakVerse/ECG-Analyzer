@@ -247,7 +247,7 @@ with st.sidebar:
     st.markdown("### 1. Upload your ECG")
     uploaded_file = st.file_uploader("Upload your ECG in .mat format", type=["mat"])
 
-    st.markdown("<hr>", unsafe_allow_html=True)
+    st.markdown(unsafe_allow_html=True)
 
     file_gts = {
         "A00001": "Normal",
