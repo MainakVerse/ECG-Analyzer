@@ -360,7 +360,7 @@ with tabs[0]:
         st.info("👈 Please upload an ECG file or select a sample from the sidebar to start.")
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.image("https://api.iconify.design/openmoji/anatomical-heart.svg?width=300", use_column_width=True)
+            st.image("https://api.iconify.design/openmoji/anatomical-heart.svg?width=300", use_container_width=True)
             
 #---------------------------------#
 # Tab 2: Ask the Cardio
@@ -378,7 +378,7 @@ with tabs[1]:
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        st.image("https://api.iconify.design/openmoji/anatomical-heart.svg?width=300", use_column_width=True)
+        st.image("https://api.iconify.design/openmoji/anatomical-heart.svg?width=300", use_container_width=True)
     
     with col2:
         # Add Gemini AI integration
